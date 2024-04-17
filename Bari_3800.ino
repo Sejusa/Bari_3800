@@ -27,17 +27,7 @@ void setup()
 
 void loop()
 { 
-  if(digitalRead(button_on) == HIGH && on == false) //Si pulsamos el pulsador.
-  {
-    move('R');
-    on = true;
-  }
-
-  if(digitalRead(button_on) == HIGH && on == true)
-    {
-      move('S');
-      on = false;
-    }
+  turn_on();
 }
 
 void move(char mov)
@@ -78,4 +68,19 @@ void move(char mov)
         digitalWrite(right_two, LOW);
         digitalWrite(left_two, LOW);
   }
+}
+
+void turn_on() //Función para que mediante un pulsador activemos y desactivemos los motores.
+{
+  if(digitalRead(button_on) == HIGH && on == false) //Si pulsamos el pulsador y 'on' es false.
+  {
+    move('R');
+    on = true; //Cambiamos el valor a true.
+  }
+
+  if(digitalRead(button_on) == HIGH && on == true) //Si volvemos a pulsarlo y 'on' es true.
+    {
+      move('S');
+      on = false; //Cambiamos el valor a false.
+    }
 }
