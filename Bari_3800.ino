@@ -3,12 +3,12 @@ int right_one = 4;
 int right_two = 5;
 int left_one = 9;
 int left_two = 10;
-int button_forward = A0;
-int button_back = A1;
-int button_right = A2;
-int button_left = A3;
-int button_on = A4;
-int on = 0;
+int button_forward = 7;
+int button_back = 8;
+int button_right = 11;
+int button_left = 12;
+int button_on = 6;
+bool on = false;
 
 void setup()
 {
@@ -27,16 +27,17 @@ void setup()
 
 void loop()
 { 
-  if(digitalRead(button_on) == HIGH && on == 0) //Si pulsamos el pulsador.
+  if(digitalRead(button_on) == HIGH && on == false) //Si pulsamos el pulsador.
   {
     move('R');
-    on = 1;
-    if(digitalRead(button_on) == HIGH && on == 1)
-    {
-      on = 0;
-      move('S');
-    }
+    on = true;
   }
+
+  if(digitalRead(button_on) == HIGH && on == true)
+    {
+      move('S');
+      on = false;
+    }
 }
 
 void move(char mov)
