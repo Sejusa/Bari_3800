@@ -1,8 +1,8 @@
-int activate = 2;
+int activate = 2; //Para activar el puente h.
 int right_one = 4;
 int right_two = 5;
 int left_one = 9;
-int  left_two = 10;
+int left_two = 10;
 
 void setup()
 {
@@ -11,7 +11,7 @@ void setup()
   pinMode(right_two, OUTPUT);
   pinMode(left_one, OUTPUT);
   pinMode(left_two, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(9600); //Para iniciar la comunicación con la consola.
 }
 
 void loop()
@@ -45,28 +45,28 @@ void move(char mov)
 
   switch(mov)
   {
-    case 'F':
+    case 'F': //Movimiento para adelante.
       digitalWrite(right_one, HIGH);
       digitalWrite(left_one, HIGH);
       digitalWrite(right_two, LOW);
       digitalWrite(left_two, LOW);
       break;
 
-    case 'B':
+    case 'B': //Movimiento hacia atrás.
         digitalWrite(right_one, LOW);
         digitalWrite(left_one, LOW);
         digitalWrite(right_two, HIGH);
         digitalWrite(left_two, HIGH);
         break;
 
-      case 'L':
+      case 'L': //Movimiento hacia la izquierda. Hacemos girar la rueda derecha pero no la izquierda para girar.
         digitalWrite(right_one, LOW);
         digitalWrite(left_one, HIGH);
         digitalWrite(right_two, LOW);
         digitalWrite(left_two, LOW);
         break;
 
-      case 'R':
+      case 'R': //Movimiento hacia la derecha. Hacemos girar la rueda izquierda pero no la derecha para girar.
         digitalWrite(right_one, HIGH);
         digitalWrite(left_one, LOW);
         digitalWrite(right_two, LOW);
