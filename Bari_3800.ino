@@ -3,6 +3,12 @@ int right_one = 4;
 int right_two = 5;
 int left_one = 9;
 int left_two = 10;
+int button_forward = A0;
+int button_back = A1;
+int button_right = A2;
+int button_left = A3;
+int button_on = A4;
+int on = 0;
 
 void setup()
 {
@@ -11,38 +17,30 @@ void setup()
   pinMode(right_two, OUTPUT);
   pinMode(left_one, OUTPUT);
   pinMode(left_two, OUTPUT);
+  pinMode(button_forward, INPUT);
+  pinMode(button_back, INPUT);
+  pinMode(button_right, INPUT);
+  pinMode(button_left, INPUT);
+  pinMode(button_on, INPUT);
   Serial.begin(9600); //Para iniciar la comunicación con la consola.
 }
 
 void loop()
 { 
-  move('R');
-
-  
-  //El motor gira 5 segundos a la derecha.
-  /*digitalWrite(activate, HIGH);
-  digitalWrite(left_one, HIGH);
-  digitalWrite(left_two, LOW);
-  delay(5000);
-  
-  //Lo paramos
-  digitalWrite(left_one, LOW);
-  delay(1000);
-  
-  //El motor gira 5 segundos a la izquierda.
-  digitalWrite(activate, LOW);
-  digitalWrite(left_one, LOW);
-  digitalWrite(left_two, HIGH);
-  delay(5000);
-  
-  //Lo paramos
-  digitalWrite(left_two, LOW);
-  delay(1000);*/
+  if(digitalRead(button_on) == HIGH && on == 0) //Si pulsamos el pulsador.
+  {
+    move('R');
+    on = 1;
+    if(digitalRead(button_on) == HIGH && on == 1)
+    {
+      on = 0;
+      move('S');
+    }
+  }
 }
 
 void move(char mov)
 {
-
   switch(mov)
   {
     case 'F': //Movimiento para adelante.
@@ -72,5 +70,11 @@ void move(char mov)
         digitalWrite(right_two, LOW);
         digitalWrite(left_two, LOW);
         break;
+      
+      case 'S': //Para parar las ruedas.
+        digitalWrite(right_one, LOW);
+        digitalWrite(left_one, LOW);
+        digitalWrite(right_two, LOW);
+        digitalWrite(left_two, LOW);
   }
 }
