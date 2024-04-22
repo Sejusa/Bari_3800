@@ -9,6 +9,7 @@ int button_right = 11;
 int button_left = 12;
 int button_on = 6;
 int on;
+int button;
 
 // Variables will change:
 int buttonState = LOW;            // the current reading from the input pin
@@ -38,7 +39,9 @@ void setup()
 
 void loop()
 { 
-  turn_on();
+  actual_Button();
+  turn_On(button);
+  program_movement(button);
 }
 
 void move(char mov)
@@ -81,8 +84,41 @@ void move(char mov)
   }
 }
 
-void turn_on() { 
-    int reading = digitalRead(button_on);
+int actual_Button() //Función para saber que botón pulsamo actualmente, devuelve 'button' que utilizaremos el la función 'turn_On'.
+{
+  if(button_forward == HIGH)
+  {
+    button = button_forward;
+    return button;
+  }
+
+  else if(button_back == HIGH)
+  {
+    button = button_back;
+    return button;
+  }
+
+  else if(button_right == HIGH)
+  {
+    button = button_right;
+    return button;
+  }
+
+  else if(button_left == HIGH)
+  {
+    button = button_left;
+    return button;
+  }
+
+  else
+  {
+    
+  }
+}
+
+void turn_On(button) 
+{ 
+    int reading = digitalRead(button);
     on = LOW;
 
     if (reading != lastButtonState) //Comprueba si el estado leído del botón es diferente al último estado guardado (lastButtonState).
@@ -106,16 +142,43 @@ void turn_on() {
     {
       if (motorRunning) // Si las ruedas ya están girando
       { 
-          move('S'); // Detener las ruedas
           motorRunning = false;
+          Serial.println("Boton sin pulsar: ");
+          Serial.println(button);
       }
 
       else 
       {
-          move('R'); // Girar a la derecha
           motorRunning = true;
+          Serial.println("Botón pulsado: ");
+          Serial.println(button);
       }
     }
 
     lastButtonState = reading; //Actualiza el último estado del botón con el estado leído actual para usarlo en la próxima iteración de la función.
+}
+
+void program_movement(char instruction) //Función para programar el movimiento, 'instruction' es el valor del botón.
+{
+  switch(instruction)
+  {
+    case button_forward:
+      move('F'); // Avanzar
+      break;
+
+    case button_back:
+      move('B'); // Retroceder
+      break;
+
+    case button_right:
+      move('R'); // Girar a la derecha
+      break;
+
+    case button_left:
+      move('L'); // Girar a la izquierda
+      break;
+
+    default:
+      break;
+  }
 }
