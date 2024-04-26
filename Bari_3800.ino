@@ -19,7 +19,14 @@ int lastButtonState = LOW;  // the previous reading from the input pin
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 unsigned long debounceDelay = 70;    // the debounce time; increase if the output flickers
 
-bool motorRunning = false; // Variable para rastrear si el motor está girando o no
+bool motorRunning = false; // Variable para rastrear si el motor está girando o no.
+
+int forward;
+int backward;
+int right;
+int left;
+
+int button;
 
 void setup()
 {
@@ -38,7 +45,7 @@ void setup()
 
 void loop()
 { 
-  turn_on();
+  actual_Button();
 }
 
 void move(char mov)
@@ -81,8 +88,8 @@ void move(char mov)
   }
 }
 
-void turn_on() { 
-    int reading = digitalRead(button_on);
+void turn_On(int pin) { 
+    int reading = digitalRead(pin);
     on = LOW;
 
     if (reading != lastButtonState) //Comprueba si el estado leído del botón es diferente al último estado guardado (lastButtonState).
@@ -106,16 +113,74 @@ void turn_on() {
     {
       if (motorRunning) // Si las ruedas ya están girando
       { 
+          Serial.println("Paco");
           move('S'); // Detener las ruedas
           motorRunning = false;
       }
 
       else 
       {
-          move('R'); // Girar a la derecha
-          motorRunning = true;
+          if(pin == forward)
+          {
+            move('F');
+            motorRunning = true;
+          }
+
+          else if(pin == backward)
+          {
+            move('B');
+            motorRunning = true;
+          }
+
+          else if(pin == right)
+          {
+            move('R');
+            motorRunning = true;
+          }
+
+          else if(pin == left)
+          {
+            move('L');
+            motorRunning = true;
+          }
       }
     }
 
     lastButtonState = reading; //Actualiza el último estado del botón con el estado leído actual para usarlo en la próxima iteración de la función.
+}
+void actual_Button()
+{
+  forward = digitalRead(button_forward);
+  backward = digitalRead(button_back);
+  right = digitalRead(button_right);
+  left = digitalRead(button_left);
+
+  if(forward == 0 && backward == 0 && right == 0 && left == 0)
+  {
+    
+  }
+
+  if(forward == 0 && backward == 0 && right == 0 && left == 1)
+  {
+    button = left;
+    turn_On(button);
+  }
+
+  if(forward == 0 && backward == 0 && right == 1 && left == 0)
+  {
+    button = right;
+    turn_On(button);
+  }
+
+  if(forward == 0 && backward == 1 && right == 0 && left == 0)
+  {
+    button = backward;
+    turn_On(button);
+  }
+
+  if(forward == 1 && backward == 0 && right == 0 && left == 0)
+  {
+    button = forward;
+    turn_On(button);
+  }
 }
