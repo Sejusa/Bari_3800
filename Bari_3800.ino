@@ -1,35 +1,60 @@
-int activate = 2; //Para activar el puente h.
+// Pines placa h
+int activate = 2;
 int right_one = 4;
 int right_two = 5;
 int left_one = 9;
 int left_two = 10;
-int button_forward = 7;
-int button_back = 8;
-int button_right = 11;
-int button_left = 12;
+
+// variables para quitar debounce
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 70;
+
+//varaibles para boton ON que sera para el programar movimiento
 int button_on = 6;
-int on;
-int LastButtonPress = 0;
+int currentStateO=LOW;
+int lastStateO=LOW;
+unsigned long lastTimeLectureO=0;
+int contO=0;
 
-// Variables will change:
-int buttonState = LOW;            // the current reading from the input pin
-int lastButtonState = LOW;  // the previous reading from the input pin
+//varaibles para boton forwrad, para mover ruedas hacia delante
+int button_forward = 7;
+int currentStateF=LOW;
+int lastStateF=LOW;
+unsigned long lastTimeLectureF=0;
+int contF=0;
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 70;    // the debounce time; increase if the output flickers
+//varaibles para boton backward, para mover ruedas hacia atras
+int button_back = 8;
+int currentStateB=LOW;
+int lastStateB=LOW;
+unsigned long lastTimeLectureB=0;
+int contB=0;
 
-bool motorRunning = false; // Variable para rastrear si el motor está girando o no.
+//varaibles para boton right, para mover ruedas hacia derecha
+int button_right = 11;
+int currentStateR=LOW;
+int lastStateR=LOW;
+unsigned long lastTimeLectureR=0;
+int contR=0;
 
-int forward;
-int backward;
-int right;
-int left;
+//varaibles para boton left, para mover ruedas hacia izquierda
+int button_left = 12;
+int currentStateL=LOW;
+int lastStateL=LOW;
+unsigned long lastTimeLectureL = 0;
+int contL=0;
 
-int button;
+//varaibles para controlar lista
+const int MAX_SIZE=10;
+int p=0;
+int list_move[MAX_SIZE];
+bool state_on=0;
+
+//varaibles para controlar botones
+//int cont;
+int residuo=0;
+
 void setup() {
-  
   pinMode(activate, OUTPUT);
   pinMode(right_one, OUTPUT);
   pinMode(right_two, OUTPUT);
@@ -41,18 +66,19 @@ void setup() {
   pinMode(button_left, INPUT);
   pinMode(button_on, INPUT);
   Serial.begin(9600); //Para iniciar la comunicación con la consola.:
-
+  move(0);
 }
-
 void loop() {
 
-   actual_Button();
-
+   press_button(button_forward,currentStateF,lastStateF,lastTimeLectureF);
+   press_button(button_back,currentStateB,lastStateB,lastTimeLectureB);
+   press_button(button_left,currentStateL,lastStateL,lastTimeLectureL);
+   press_button(button_right,currentStateR,lastStateR,lastTimeLectureR);
+   press_button(button_on,currentStateO,lastStateO,lastTimeLectureO);
 }
-
-void move(int button)
+void move(int number)
 {
-  switch(button)
+  switch(number)
   {
     case 1: //Movimiento para adelante.
       digitalWrite(right_one, HIGH);
@@ -81,7 +107,7 @@ void move(int button)
         digitalWrite(right_two, LOW);
         digitalWrite(left_two, LOW);
         break;
-      
+
       case 0: //Para parar las ruedas.
         digitalWrite(right_one, LOW);
         digitalWrite(left_one, LOW);
@@ -90,81 +116,145 @@ void move(int button)
   }
 }
 
-void turn_On(int pin, int button) //'pin' es el pin donde esta conectado el botón y 'button' lo usaremos para controlar la variable 'move'.
-{ 
-    int reading = digitalRead(pin);
-    if (reading == HIGH)
-    {    
-    int x = pin - LastButtonPress; //Para establecer el valor de 'x'.
-        if (x == 0)
-        {
-          move(button);
-        }
+void press_button(int button, int &currentState, int &lastState, unsigned long &lastTimeLecture ){
+      // Note: &variable to indicate the input variable is a reference of the global variables, it means,
+      // that the variable chenges within function will modify the global variable
+        // current state ==last state -> not press button
+    if ( currentState==digitalRead(button) ) {
 
-        else 
-        {
-        lastDebounceTime = millis(); //Si hay un cambio en el estado del botón, actualiza el tiempo del último rebote (debounce) con el tiempo actual en milisegundos.
-           
-           if ((millis() - lastDebounceTime) > debounceDelay) // Comprueba si ha pasado el tiempo de rebote (debounceDelay) desde el último rebote.
-           { 
-              x = 0; //Establecemos el valor de 'x' a 0.
-           }   
+      lastTimeLecture = 0;
+    }
+    // current state!= las state-> press button,
+
+    else{
+      //if last time lecture ==0 -> we must save switch time
+      if (lastTimeLecture == 0 ) {
+
+        lastTimeLecture = millis();
+      }
+      else{
+      // if last_time_lecture!=0, check if debounce delay has passed
+        if ( millis()-lastTimeLecture> debounceDelay ){
+        // if debounce  delay has passed ->state has changed
+          currentState = !currentState;
         }
+      }
     }
 
-    else
+    if(lastState==LOW && currentState==HIGH){
+      //0----______1
+      read_inputs(button);
+  
+    }
+
+  lastState=currentState;
+}
+
+
+//función para detectar el boton pulsado
+void read_inputs(int button){
+  switch(button){
+    case 7:
+      move(1);
+      contF++;
+       if((contF % 2)==residuo){ //nos servira para que en la segunda pulsacion el robot se pare
+        move(0); 
+      }
+      break;
+    case 8:
+      move(2);
+      contB++;
+       if((contB % 2)==residuo){ //nos servira para que en la segunda pulsacion el robot se pare
+        move(0);
+      }
+      break;
+    case 11:
+      move(3);
+      contR++;
+      if((contR % 2)==residuo){ //nos servira para que en la segunda pulsacion el robot se pare
+        move(0);
+      }
+      break;
+    case 12:
+      move(4);
+      contL++;
+      if((contL % 2)==residuo){ //nos servira para que en la segunda pulsacion el robot se pare
+        move(0);
+      }
+      break;
+    case 6:
+      contO++;
+      movimiento();
+      if(contO == 11){//para accionar la lista
+        print_lista();
+      }
+      break;
+      
+  }
+
+
+}
+void movimiento(){
+    //Serial.println("hola");
+  
+   // Serial.println(lastStateF);
+  //  Serial.println(lastStateB);
+  //  Serial.println(lastStateR);
+  //  Serial.println(lastStateL);
+    
+    if (currentStateF==1)
     {
-     // código futuro
+      move(0);
+      add_element(1);
+    //  Serial.println("hola");
     }
-    
-  LastButtonPress = pin;
+    if (currentStateB==1)
+    {
+      move(0);
+      add_element(2);
+     
+    }
+    if (currentStateR==1)
+    {
+      move(0);
+      add_element(3);
+      
+    }
+    if (currentStateL==1)
+    {
+      move(0);
+      add_element(4);
+     
+      
+    }
+  
 }
-
-void actual_Button()
+void print_lista()
 {
-  forward = digitalRead(button_forward);
-  backward = digitalRead(button_back);
-  right = digitalRead(button_right);
-  left = digitalRead(button_left);
+  for (int i=0; i<=p; i++)
+      {
+        move(list_move[i]);
+        delay(3000);
+      }
+}
 
-  if(forward == 0 && backward == 0 && right == 0 && left == 0)
+void add_element(int number_list)
+{
+  if (p < MAX_SIZE)
   {
-    button = 0;
-   // Serial.println("Quieto");
-    move(button);
-   // turn_On(button);
-  }
-
-  if(forward == 0 && backward == 0 && right == 0 && left == 1)
-  {
-    button = 3;
-    //Serial.println("Izquierda");
-    //move(button);
-    turn_On(button_left, button);
-    
-  }
-
-  if(forward == 0 && backward == 0 && right == 1 && left == 0)
-  {
-    button = 4;
-    //Serial.println("Derecha");
-    //move(button);
-    turn_On(button_right, button);
-  }
-
-  if(forward == 0 && backward == 1 && right == 0 && left == 0)
-  {
-    button = 2;
-    //Serial.println("Atras");
-    //move(button);
-    turn_On(button_back, button);
-  }
-
-  if(forward == 1 && backward == 0 && right == 0 && left == 0)
-  {
-    button = 1;
-    //Serial.println("Delante");
-    //move(button);
-    turn_On(button_forward, button);
+    list_move[p] = number_list;
+    p++;
   }
 }
+
+void delete_array()
+{
+
+ for(int j = 0; j < p; j++)
+ {
+  list_move[j]=0;
+ }
+ p=0;
+}
+
+//Per poder utilitzar el programa moviment hauras de pulsa el boto amb el moviment que vols i despres mantenint pulsat el boto del moviment tindras que clicar el boto 6 per poder afegir la variable a la llista
